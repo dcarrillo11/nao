@@ -1,11 +1,8 @@
 alphamini==1.2.0
 brainflow==5.12.1
-ffpyplayer==4.5.1
 matplotlib==3.8.4
 mne==1.7.1
 moviepy==1.0.3
-numpy==2.0.0
-opencv_python==4.9.0.80
 pandas==2.2.2
 psutil==5.9.8
 PyAutoGUI==0.9.54
@@ -13,4 +10,3 @@ pydub==0.25.1
 pygame==2.5.2
 pylsl==1.16.2
 scipy==1.13.1
-tkvideoplayer==2.8
