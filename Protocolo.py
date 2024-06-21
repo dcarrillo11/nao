@@ -13,11 +13,9 @@ import matplotlib.pyplot as plt
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
-from tkVideoPlayer import TkinterVideo
 #import cv2 as cv
 import pygame
 from moviepy.editor import *
-from ffpyplayer.player import MediaPlayer
 from pydub import AudioSegment
 from pydub.playback import play
 from pylsl import StreamInlet, resolve_stream
@@ -25,7 +23,8 @@ from pylsl import StreamInlet, resolve_stream
 import mini.mini_sdk as MiniSdk
 from mini.apis import *
 from mini.dns.dns_browser import WiFiDevice
-from mini.apis.test_connect import test_connect, shutdown, test_get_device_by_name, test_play_action
+
+from test_connect import test_connect, shutdown, test_get_device_by_name, test_play_action
 
 
 def get_args():
