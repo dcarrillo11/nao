@@ -24,7 +24,7 @@ import mini.mini_sdk as MiniSdk
 from mini.apis import *
 from mini.dns.dns_browser import WiFiDevice
 
-from test_connect import test_connect, shutdown, test_get_device_by_name, test_play_action
+from test_connect import test_connect, test_get_device_by_name, test_play_action
 
 
 def get_args():
@@ -42,7 +42,7 @@ def check_and_rename(file_path, add = 0):
 
     original_file_path = file_path
     if add != 0:
-        split = file_path.split(".")
+        split = file_path.rsplit(".", 1)
         part_1 = split[0] + "_" + str(add)
         file_path = ".".join([part_1, split[1]])
     if not os.path.isfile(file_path):
@@ -122,13 +122,13 @@ def arm_setup(n_rep, random_order = True):
 def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
     if start and protocol_type == 'control':
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Comienzo.mp4')
+        play_video_3('./Media/Comienzo.mp4')
     elif start:
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Comienzo_detalle.mp4')
+        play_video_3('./Media/Comienzo_detalle.mp4')
     elif protocol_type == 'video':
-        play_audio('C:/Users/pc2/Proyecto_Alphamini/Media/Relax.mp3')
+        play_audio('./Media/Relax.mp3')
     else:
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Relax.mp4')
+        play_video_3('./Media/Relax.mp4')
 
     print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M'))
     data_dict = record_data(relax_time, inlet)
@@ -142,11 +142,11 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 def control_protocol(mov):
     
     if mov == 'right':
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Imagina_dch.mp4')
+        play_video_3('./Media/Imagina_dch.mp4')
     elif mov == 'left':
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Imagina_izq.mp4')
+        play_video_3('./Media/Imagina_izq.mp4')
     else:
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/Imagina_ambos.mp4')
+        play_video_3('./Media/Imagina_ambos.mp4')
 
     
 def robot_protocol(mov):
@@ -162,11 +162,11 @@ def robot_protocol(mov):
 def video_protocol(mov):
 
     if mov == 'right':
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/alphamini_right_front.mp4')
+        play_video_3('./Media/alphamini_right_front.mp4')
     elif mov == 'left':
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/alphamini_left_front.mp4')
+        play_video_3('./Media/alphamini_left_front.mp4')
     else:
-        play_video_3('C:/Users/pc2/Proyecto_Alphamini/Media/alphamini_both_front.mp4')  
+        play_video_3('./Media/alphamini_both_front.mp4')  
 
 
 def vr_protocol(mov):
@@ -253,11 +253,11 @@ def base_protocol(inlet, protocol_type, n_rep):
         df_list.append(df_relax)
 
         if rep == (n_rep -1):
-            play_video_3("C:/Users/pc2/Proyecto_Alphamini/Media/Fin.mp4", end = True)
+            play_video_3("./Media/Fin.mp4", end = True)
 
     complete_df = pd.concat(df_list, ignore_index=True)
     complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
-    df_name = check_and_rename('C:/Users/pc2/Proyecto_Alphamini/Datos/{p}/{p}_{i}.csv'.format(p = protocol_type,i = id))
+    df_name = check_and_rename('./Results/{p}/{p}_{i}.csv'.format(p = protocol_type,i = id))
     complete_df.to_csv(df_name, index=False)
     print(df_name + ' saved!')
 
