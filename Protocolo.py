@@ -70,7 +70,7 @@ def record_data(duration, inlet, fs = 250):
     while not finished:
 
         data, timestamp = inlet.pull_sample()
-        #print("got %s at time %s" % (data[0], timestamp))
+        print("got %s at time %s" % (data[0], timestamp))
         timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
         #The timestamp you get is the seconds since the computer was turned on,
         #so we add to the timestamp the date when the computer was started (psutil.boot_time())
@@ -209,42 +209,24 @@ def base_protocol(inlet, protocol_type, n_rep):
     
         df_iter= f"df_{rep}"
 
+        options.get(protocol_type)(movements_list[rep])
+        data_dict = record_data(record_times.get(protocol_type), inlet)
+        globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
+
         if movements_list[rep] == 'right':
-            inicio = time.time()
-            options.get(protocol_type)(movements_list[rep])
-            data_dict = record_data(record_times.get(protocol_type), inlet)
-            fin = time.time()
-            print("TIEMPO:")
-            print(fin-inicio)
             
-            globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
             globals()[df_iter]['STI'] = 1 #right_label
             df_list.append(globals()[df_iter])
             print("dch anotado")
             
-
         elif movements_list[rep]=='left':
-            inicio = time.time()
-            options.get(protocol_type)(movements_list[rep])   
-            data_dict = record_data(record_times.get(protocol_type), inlet)
-            fin = time.time()
-            print("TIEMPO:")
-            print(fin-inicio)
 
-            globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
             globals()[df_iter]['STI'] = 2 #left label
             df_list.append(globals()[df_iter])
             print("izq anotado")
 
         elif movements_list[rep]=='both':
-            inicio = time.time()
-            options.get(protocol_type)(movements_list[rep])
-            data_dict = record_data(record_times.get(protocol_type), inlet)
-            fin = time.time()
-            print("TIEMPO:")
-            print(fin-inicio)
-
-            globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
+            
             globals()[df_iter]['STI'] = 3 #both label
             df_list.append(globals()[df_iter])
             print("ambos anotados")
