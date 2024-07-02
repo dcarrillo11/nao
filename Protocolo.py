@@ -19,6 +19,7 @@ from moviepy.editor import *
 from pydub import AudioSegment
 from pydub.playback import play
 from pylsl import StreamInlet, resolve_stream
+from ppadb.client import Client
 
 import mini.mini_sdk as MiniSdk
 from mini.apis import *
@@ -55,13 +56,27 @@ def robot_connect():
 
     MiniSdk.set_robot_type(MiniSdk.RobotType.EDU) #tipo de robot
     #Encontrar robot (device) en la red WiFi:
-    device: WiFiDevice = asyncio.get_event_loop().run_until_complete(test_get_device_by_name())
-    if device: #Si lo encuentra, se conecta
-        asyncio.get_event_loop().run_until_complete(test_connect(device))
+    device_robot: WiFiDevice = asyncio.get_event_loop().run_until_complete(test_get_device_by_name())
+    if device_robot: #Si lo encuentra, se conecta
+        asyncio.get_event_loop().run_until_complete(test_connect(device_robot))
         return True
     else:
         messagebox.showerror(title="Conection error", message = "Alphamini está desconectado")
         return False
+    
+def android_connect():
+
+    adb = Client(host="127.0.0.1", port=5037)
+    devices = adb.devices()
+
+    if len(devices) == 0:
+        messagebox.showerror(title="Conection error", message = "Móvil desconectado o innaccesible")
+        return False
+    else:
+        global device_adb
+        device_adb = devices[0]
+        return True
+
 
 def record_data(duration, inlet, fs = 250):
     columns = ['Time',"FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2", 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
@@ -183,16 +198,16 @@ def base_protocol(inlet, protocol_type, n_rep):
 
     movements_list = arm_setup(n_rep)
 
-    #Robot connection
+    #Connections
     if protocol_type == 'robot':
         if not robot_connect():
+            return
+    elif protocol_type == 'vr':
+        if not android_connect():
             return
 
     #Protocol Initiation
     df_list = [relax_protocol(inlet, protocol_type, relax_time = 5)]      
-
-    #Protocol stop
-
         
     #Choosen Protocol Execution
     options = {'control': control_protocol, 
