@@ -1,7 +1,6 @@
 
 import os
 import sys
-import argparse
 import time
 import asyncio
 import random
@@ -19,24 +18,14 @@ from moviepy.editor import *
 from pydub import AudioSegment
 from pydub.playback import play
 from pylsl import StreamInlet, resolve_stream
-from ppadb.client import Client
 
 import mini.mini_sdk as MiniSdk
 from mini.apis import *
 from mini.dns.dns_browser import WiFiDevice
 
 from test_connect import test_connect, test_get_device_by_name, test_play_action
-
-
-def get_args():
-    """ Get command-line arguments """
-
-    parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('protocol', help = 'Choose the protocol to be recorded: control,robot,video,VR', type = str)
-
-    return parser.parse_args()
+from android_vr import android_connect, start_vr, stop_vr
+from movie_editor import vrmaker
 
 
 def check_and_rename(file_path, add = 0):
@@ -63,19 +52,6 @@ def robot_connect():
     else:
         messagebox.showerror(title="Conection error", message = "Alphamini está desconectado")
         return False
-    
-def android_connect():
-
-    adb = Client(host="127.0.0.1", port=5037)
-    devices = adb.devices()
-
-    if len(devices) == 0:
-        messagebox.showerror(title="Conection error", message = "Móvil desconectado o innaccesible")
-        return False
-    else:
-        global device_adb
-        device_adb = devices[0]
-        return True
 
 
 def record_data(duration, inlet, fs = 250):
@@ -85,7 +61,7 @@ def record_data(duration, inlet, fs = 250):
     while not finished:
 
         data, timestamp = inlet.pull_sample()
-        print("got %s at time %s" % (data[0], timestamp))
+        #print("got %s at time %s" % (data[0], timestamp))
         timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
         #The timestamp you get is the seconds since the computer was turned on,
         #so we add to the timestamp the date when the computer was started (psutil.boot_time())
@@ -140,9 +116,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
         play_video_3('./Media/Comienzo.mp4')
     elif start:
         play_video_3('./Media/Comienzo_detalle.mp4')
-    elif protocol_type == 'video':
-        play_audio('./Media/Relax.mp3')
-    else:
+    elif protocol_type == 'control':
         play_video_3('./Media/Relax.mp4')
 
     print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M'))
@@ -184,15 +158,15 @@ def video_protocol(mov):
         play_video_3('./Media/alphamini_both_front.mp4')  
 
 
-def vr_protocol(mov):
+def vr_protocol(movements_list, device = None):
     
-    if mov == 'right':
-        pass
-    elif mov == 'left':
-        pass
+    if type(movements_list) is list:
+        vrmaker(movements_list)
+        start_vr(device)
+        time.sleep(24)
     else:
         pass
-    
+        
 
 def base_protocol(inlet, protocol_type, n_rep):
 
@@ -203,8 +177,11 @@ def base_protocol(inlet, protocol_type, n_rep):
         if not robot_connect():
             return
     elif protocol_type == 'vr':
-        if not android_connect():
+        adb_ready, adb_device = android_connect
+        if not adb_ready:
             return
+        else:
+            vr_protocol(movements_list, adb_device)
 
     #Protocol Initiation
     df_list = [relax_protocol(inlet, protocol_type, relax_time = 5)]      
@@ -246,11 +223,15 @@ def base_protocol(inlet, protocol_type, n_rep):
             df_list.append(globals()[df_iter])
             print("ambos anotados")
         
-        df_relax = relax_protocol(inlet, protocol_type, relax_time = 7, start = False)
+        df_relax = relax_protocol(inlet, protocol_type, relax_time = 4, start = False)
         df_list.append(df_relax)
 
         if rep == (n_rep -1):
-            play_video_3("./Media/Fin.mp4", end = True)
+            if protocol_type == "vr":
+                time.sleep(5)
+                stop_vr(adb_device)
+            else:
+                play_video_3("./Media/Fin.mp4", end = True)
 
     complete_df = pd.concat(df_list, ignore_index=True)
     complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
