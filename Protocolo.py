@@ -14,7 +14,7 @@ import tkinter.ttk as ttk
 from tkinter import messagebox
 #import cv2 as cv
 import pygame
-from moviepy.editor import *
+from moviepy.editor import VideoFileClip
 from pydub import AudioSegment
 from pydub.playback import play
 from pylsl import StreamInlet, resolve_stream
@@ -61,7 +61,7 @@ def record_data(duration, inlet, fs = 250):
     while not finished:
 
         data, timestamp = inlet.pull_sample()
-        #print("got %s at time %s" % (data[0], timestamp))
+        print("got %s at time %s" % (data[0], timestamp))
         timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
         #The timestamp you get is the seconds since the computer was turned on,
         #so we add to the timestamp the date when the computer was started (psutil.boot_time())
@@ -112,12 +112,18 @@ def arm_setup(n_rep, random_order = True):
 
 def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
-    if start and protocol_type == 'control':
-        play_video_3('./Media/Comienzo.mp4')
-    elif start:
-        play_video_3('./Media/Comienzo_detalle.mp4')
-    elif protocol_type == 'control':
-        play_video_3('./Media/Relax.mp4')
+    if start:
+        if protocol_type == 'control':
+            play_video_3('./Media/Comienzo.mp4')
+        elif protocol_type == ('video' or 'robot'):
+            play_video_3('./Media/Comienzo_detalle.mp4')
+        else:
+            pass
+    else:
+        if protocol_type == 'control':
+            play_video_3('./Media/Relax.mp4')
+        else:
+            pass
 
     print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M'))
     data_dict = record_data(relax_time, inlet)
@@ -161,7 +167,7 @@ def video_protocol(mov):
 def vr_protocol(movements_list, device = None):
     
     if type(movements_list) is list:
-        vrmaker(movements_list)
+        #vrmaker(movements_list)
         start_vr(device)
         time.sleep(24)
     else:
@@ -177,7 +183,7 @@ def base_protocol(inlet, protocol_type, n_rep):
         if not robot_connect():
             return
     elif protocol_type == 'vr':
-        adb_ready, adb_device = android_connect
+        adb_ready, adb_device = android_connect()
         if not adb_ready:
             return
         else:
