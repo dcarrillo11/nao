@@ -110,7 +110,7 @@ def arm_setup(n_rep, random_order = True):
     return movements
 
 
-def relax_protocol(inlet, protocol_type, relax_time = 5, start = True):
+def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
     if start:
         if protocol_type == 'control':
@@ -125,11 +125,11 @@ def relax_protocol(inlet, protocol_type, relax_time = 5, start = True):
         else:
             pass
 
-    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M'))
+    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
     data_dict = record_data(relax_time, inlet)
     df_relax = pd.DataFrame.from_dict(data_dict)
     df_relax['STI'] = 0 #Relax label for the data
-    print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M'))
+    print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     return df_relax
 
@@ -167,9 +167,9 @@ def video_protocol(mov):
 def vr_protocol(movements_list, device = None):
     
     if type(movements_list) is list:
-        vr_maker(movements_list)
+        #vr_maker(movements_list)
         start_vr(device)
-        time.sleep(24)
+        time.sleep(23)
     else:
         pass
         
@@ -199,8 +199,8 @@ def base_protocol(inlet, protocol_type, n_rep):
             'vr': vr_protocol}
     
     record_times = {'control': 10, 
-            'robot': 5, 
-            'video': 5, 
+            'robot': 10, 
+            'video': 10, 
             'vr': 5}
 
     for rep in range(len(movements_list)):
@@ -208,6 +208,7 @@ def base_protocol(inlet, protocol_type, n_rep):
         df_iter= f"df_{rep}"
 
         options.get(protocol_type)(movements_list[rep])
+        print('empiezo a anotar')
         data_dict = record_data(record_times.get(protocol_type), inlet)
         globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
 
@@ -215,19 +216,19 @@ def base_protocol(inlet, protocol_type, n_rep):
             
             globals()[df_iter]['STI'] = 1 #right_label
             df_list.append(globals()[df_iter])
-            print("dch anotado")
+            print("dch anotado\n")
             
         elif movements_list[rep]=='left':
 
             globals()[df_iter]['STI'] = 2 #left label
             df_list.append(globals()[df_iter])
-            print("izq anotado")
+            print("izq anotado\n")
 
         elif movements_list[rep]=='both':
             
             globals()[df_iter]['STI'] = 3 #both label
             df_list.append(globals()[df_iter])
-            print("ambos anotados")
+            print("ambos anotados\n")
         
         df_relax = relax_protocol(inlet, protocol_type, relax_time = 4, start = False)
         df_list.append(df_relax)
