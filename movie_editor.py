@@ -3,7 +3,7 @@ import os
 import sys
 import random
 import pygame
-from moviepy.editor import *
+from moviepy.editor import VideoFileClip, concatenate_videoclips
 from tkinter import messagebox
 
 def arm_setup(n_rep, random_order = True):
@@ -36,11 +36,11 @@ def arm_setup(n_rep, random_order = True):
 
 def vrmaker(moves):
     # loading video dsa gfg intro video
-    clip0 = VideoFileClip("./media/Comienzo_detalle_vr.mp4",target_resolution=(2160,2160))
-    clip1 = VideoFileClip("./media/right_vr_injected.mp4")
-    clip2 = VideoFileClip("./media/left_vr_injected.mp4")
-    clip3 = VideoFileClip("./media/both_vr_injected.mp4")
-    clip4 = VideoFileClip("./media/Fin_vr.mp4", target_resolution=(2160,2160))
+    clip0 = VideoFileClip("./Media/Comienzo_detalle_vr.mp4",target_resolution=(2160,2160))
+    clip1 = VideoFileClip("./Media/right_vr_injected.mp4")
+    clip2 = VideoFileClip("./Media/left_vr_injected.mp4")
+    clip3 = VideoFileClip("./Media/both_vr_injected.mp4")
+    clip4 = VideoFileClip("./Media/Fin_vr.mp4", target_resolution=(2160,2160))
 
     clips = list()
 
@@ -64,7 +64,7 @@ def vrmaker(moves):
     # concatenating the clips
     final = concatenate_videoclips(clips)
     #writing the video into a file / saving the combined video
-    final.write_videofile("./media/merged.mp4")
+    final.write_videofile("./Media/merged.mp4")
 
 def main():
     pass
