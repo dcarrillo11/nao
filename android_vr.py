@@ -50,7 +50,7 @@ def start_vr(device):
     device.shell(f'pm clear com.xojot.vrplayer')
     device.shell(f'media volume --set 0')
     device.shell(f'am start -n com.xojot.vrplayer/.MainActivity')
-    time.sleep(2)
+    time.sleep(1.5)
     device.shell(f'input tap 530 2880')
     device.shell(f'input tap 530 2880')
     device.shell(f'input tap 400 950')
@@ -60,8 +60,7 @@ def start_vr(device):
     device.shell(f'input tap 210 2680')
     device.shell(f'input tap 1350 100')
     device.shell(f'input tap 1300 720')
-    time.sleep(2)
-    device.shell(f'media volume --set 7')
+    #device.shell(f'media volume --set 7')
     device.shell(f'input tap 1500 720')
 
 def stop_vr(device):

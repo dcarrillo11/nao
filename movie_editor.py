@@ -34,7 +34,7 @@ def arm_setup(n_rep, random_order = True):
     new_clip.write_videofile(output) """
 
 
-def vrmaker(moves):
+def vr_maker(moves):
     # loading video dsa gfg intro video
     clip0 = VideoFileClip("./Media/Comienzo_detalle_vr.mp4",target_resolution=(2160,2160))
     clip1 = VideoFileClip("./Media/right_vr_injected.mp4")
@@ -45,7 +45,7 @@ def vrmaker(moves):
     clips = list()
 
     clips.append(clip0)
-    clips.append(clip0.to_ImageClip(0, duration = 10))
+    clips.append(clip0.to_ImageClip(0, duration = 5))
 
     for move in moves:
 
@@ -67,9 +67,9 @@ def vrmaker(moves):
     final.write_videofile("./Media/merged.mp4")
 
 def main():
-    pass
+    moves = arm_setup(15)
+    vr_maker(moves)
 
 if __name__ == '__main__':
-    moves = arm_setup(15)
-    vrmaker(moves)
+    main()
 

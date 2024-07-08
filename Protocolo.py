@@ -25,7 +25,7 @@ from mini.dns.dns_browser import WiFiDevice
 
 from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
-from movie_editor import vrmaker
+from movie_editor import vr_maker
 
 
 def check_and_rename(file_path, add = 0):
@@ -61,7 +61,7 @@ def record_data(duration, inlet, fs = 250):
     while not finished:
 
         data, timestamp = inlet.pull_sample()
-        print("got %s at time %s" % (data[0], timestamp))
+        #print("got %s at time %s" % (data[0], timestamp))
         timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
         #The timestamp you get is the seconds since the computer was turned on,
         #so we add to the timestamp the date when the computer was started (psutil.boot_time())
@@ -110,7 +110,7 @@ def arm_setup(n_rep, random_order = True):
     return movements
 
 
-def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
+def relax_protocol(inlet, protocol_type, relax_time = 5, start = True):
 
     if start:
         if protocol_type == 'control':
@@ -167,7 +167,7 @@ def video_protocol(mov):
 def vr_protocol(movements_list, device = None):
     
     if type(movements_list) is list:
-        #vrmaker(movements_list)
+        vr_maker(movements_list)
         start_vr(device)
         time.sleep(24)
     else:
