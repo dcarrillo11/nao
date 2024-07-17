@@ -62,9 +62,11 @@ def record_data(duration, inlet, fs = 250):
 
         data, timestamp = inlet.pull_sample()
         #print("got %s at time %s" % (data[0], timestamp))
-        timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
+
+        #timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
         #The timestamp you get is the seconds since the computer was turned on,
         #so we add to the timestamp the date when the computer was started (psutil.boot_time())
+
         all_data = [timestamp] + data
 
         rep = 0
@@ -128,7 +130,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
     data_dict = record_data(relax_time, inlet)
     df_relax = pd.DataFrame.from_dict(data_dict)
-    df_relax['STI'] = 0 #Relax label for the data
+    df_relax['STI'] = 4 #Relax label for the data
     print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     return df_relax
