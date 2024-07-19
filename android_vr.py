@@ -30,7 +30,7 @@ def android_connect():
         device = devices[0]
         return True, device
 
-def start_vr(device):
+def unlock(device):
 
     device.push("./media/merged.mp4", "/sdcard/Alphamini/merged.mp4")
 
@@ -46,6 +46,11 @@ def start_vr(device):
         device.shell(f'input text "9420"')
     else:
         device.shell(f'input keyevent 3')
+    
+
+def start_vr(device):
+
+    unlock(device)
 
     device.shell(f'pm clear com.xojot.vrplayer')
     device.shell(f'media volume --set 0')
