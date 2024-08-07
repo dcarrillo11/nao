@@ -8,7 +8,7 @@ def start_server():
 
     Popen(['adb.exe', 'start-server'], stderr=PIPE, stdout=PIPE)
     time.sleep(2)
-    Popen(['scrcpy'], stderr=PIPE, stdout=PIPE)
+    #Popen(['scrcpy'], stderr=PIPE, stdout=PIPE)
     print("daemon server online")
 
 def kill_server():
@@ -32,8 +32,6 @@ def android_connect():
 
 def unlock(device):
 
-    device.push("./media/merged.mp4", "/sdcard/Alphamini/merged.mp4")
-
     screen_state = device.shell(f'dumpsys display | grep mScreenState=')
     screen_lock = device.shell(f'dumpsys window | grep -oE "mDreamingLockscreen=....."')
 
@@ -46,11 +44,12 @@ def unlock(device):
         device.shell(f'input text "9420"')
     else:
         device.shell(f'input keyevent 3')
-    
+
+ 
 
 def start_vr(device):
 
-    unlock(device)
+    #device.push("./media/merged.mp4", "/sdcard/Alphamini/merged.mp4")
 
     device.shell(f'pm clear com.xojot.vrplayer')
     device.shell(f'media volume --set 0')
@@ -64,8 +63,10 @@ def start_vr(device):
     device.shell(f'input tap 600 1500')
     device.shell(f'input tap 210 2680')
     device.shell(f'input tap 1350 100')
-    device.shell(f'input tap 1300 720')
-    #device.shell(f'media volume --set 7')
+    time.sleep(1)
+    device.shell(f'input tap 1250 720')
+    device.shell(f'media volume --set 7')
+    device.shell(f'input tap 550 350')
     device.shell(f'input tap 1500 720')
 
 def stop_vr(device):
