@@ -124,6 +124,8 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     else:
         if protocol_type == 'control':
             play_video_3('./Media/Relax.mp4')
+        elif protocol_type == ('video' or 'robot'):
+            play_audio('./Media/Relax.mp3')
         else:
             pass
 
