@@ -137,10 +137,11 @@ def participant_setup(clicked_id, n_rep):
         participants = json.load(file)
 
     if id in participants.keys():
-        movements_list = participants[id]
+        movements_list = participants[id][0]
     else:
         movements_list = arm_setup(n_rep)
-        participants[id] = movements_list
+        last_key =  list(participants.keys())[-1]
+        participants[id] = [movements_list, (participants[last_key][1] + 1)]
         with open('participants.json', 'w') as file:
             json.dump(participants, file)
     
@@ -239,7 +240,7 @@ def main():
 
     #Participants
     if not os.path.isfile("participants.json"):
-        participants = {"test" : ["both", "left", "right"]}
+        participants = {"test" : [["both", "left", "right"],0]}
         with open('participants.json', 'w') as file:
             json.dump(participants, file)
     else:

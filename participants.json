@@ -1,1 +1,1 @@
-{"test": ["both", "left", "right"], "pepin": ["both", "right", "left"]}
+{"test": [["both", "left", "right"], 0]}
