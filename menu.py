@@ -5,6 +5,7 @@ import time
 import asyncio
 import random
 from datetime import date, datetime
+import json
 
 import psutil
 import pandas as pd
@@ -95,7 +96,7 @@ def play_audio(audiopath):
     play(audio)
 
 
-def arm_setup(n_rep, random_order = True):
+def arm_setup(n_rep):
     movements = list()
 
     # Agregamos "izquierdo", "derecho" y "ambos" 
@@ -107,15 +108,49 @@ def arm_setup(n_rep, random_order = True):
         else:
             movements.append("both")
     
-    if random_order == True: # Mezclamos aleatoriamente la lista
+    while True:
+        # Shuffle the list randomly
         random.shuffle(movements)
+
+        # Check if the list meets the constraint of no more than two consecutive elements of the same type
+        valid = True
+        for i in range(len(movements) - 2):
+            if movements[i] == movements[i+1] == movements[i+2]:
+                valid = False
+                break
+        if valid:
+            return movements
+
+def participant_setup(clicked_id, n_rep):
+
+    global newid_flag
+
+    if not newid_flag:
+        id = clicked_id.get()
+        print(id)
+    else:
+        id = newid
+        newid_flag = False
+        print(newid, newid_flag)
+
+    with open('participants.json', 'r') as file:
+        participants = json.load(file)
+
+    if id in participants.keys():
+        movements_list = participants[id]
+    else:
+        movements_list = arm_setup(n_rep)
+        participants[id] = movements_list
+        with open('participants.json', 'w') as file:
+            json.dump(participants, file)
     
-    return movements
+    return id, movements_list
 
 
-def base_protocol(inlet, protocol_type, n_rep):
+def base_protocol(inlet, protocol_type, n_rep, clicked_id):
 
-    movements_list = arm_setup(n_rep)
+    id, movements_list = participant_setup(clicked_id, n_rep)
+    return
 
     #Connections
     if protocol_type == 'robot':
@@ -181,7 +216,7 @@ def base_protocol(inlet, protocol_type, n_rep):
 
     complete_df = pd.concat(df_list, ignore_index=True)
     complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
-    df_name = check_and_rename('./Results/{p}/{p}_{i}.csv'.format(p = protocol_type,i = id))
+    df_name = check_and_rename('./Results/{i}/{i}_{p}.csv'.format(p = protocol_type,i = id))
     complete_df.to_csv(df_name, index=False)
     print(df_name + ' saved!')
 
@@ -197,16 +232,24 @@ def main():
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
     included_electrodes = ["FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2"]
     fs = 250
+    n_rep = 3 #Number of Imagery-Execution
 
-    global n_rep
-    n_rep = 3 #Number of Imagery-Execution 
+    global newid_flag
+    newid_flag = False
 
-    global id
-    id = "test"
+    #Participants
+    if not os.path.isfile("participants.json"):
+        participants = {"test" : ["both", "left", "right"]}
+        with open('participants.json', 'w') as file:
+            json.dump(participants, file)
+    else:
+        with open('participants.json', 'r') as file:
+            participants = json.load(file)
 
     ####################
     #Unicorn connection#
     ####################
+
     """ try:
         streams = resolve_stream()
         inlet = StreamInlet(streams[0])
@@ -223,22 +266,43 @@ def main():
     root.geometry("300x600+600+100")
     root.title("Protocol GUI")
 
-    def save_id():
-        
-        #Date
-        fecha = []
-        today = date.today()
-        fecha.append(today.day)
-        fecha.append(today.month)
-        fecha.append(today.year)
-        fecha_str = ''.join(map(str, fecha)) #fecha actual en string (e.g. 10122022)
-        
-        global id
-        id = '{}_{}'.format(id_entry.get(),fecha_str)
-        # Aquí podrías guardar el ID en una variable o archivo para su posterior uso
-        print(f"ID guardado: {id}")
 
+    def openIDwindow():
 
+        def save_newid():
+            
+            #Usar la keyword global es la unica manera de sacar una variable de esta función. 
+            global newid
+            newid = (id_entry.get()).lower()
+            path = './Results/{p}/'.format(p = newid)
+            if not os.path.exists(path):
+                os.mkdir(path)
+                global newid_flag
+                newid_flag = True
+                print(newid_flag)
+            else:
+                messagebox.showerror(title="ID error", message = "El usuario %s ya existe" % id)
+
+            
+            print(f"ID guardado: {id}")
+            IDWindow.destroy()
+
+        IDWindow = tk.Toplevel(root)
+ 
+        IDWindow.title("New ID")
+    
+        # sets the geometry of toplevel
+        IDWindow.geometry("300x220")
+    
+        newid_label = tk.Label(IDWindow,text ="Input the ID\nin the box below:", font = ('calibri', 20))
+        id_entry = tk.Entry(IDWindow, width=40, font=('calibri', 15))
+        save_button = ttk.Button(IDWindow, text="Save ID",style="B2.TButton", command=save_newid)
+
+        newid_label.pack(pady = 10)
+        id_entry.pack(pady = 10, padx = 50)
+        save_button.pack(pady = 10)
+
+    
     b1_style = ttk.Style()
     b1_style.configure('TButton', font =
                ('calibri', 20),
@@ -260,25 +324,30 @@ def main():
     b3_style.map('B3.TButton', foreground = [('active', '!disabled', 'red')],
                     background = [('active', 'black')])
 
+    #Dropdown Menu config
+    options = participants.keys()
+    clicked_id = tk.StringVar() 
+    clicked_id.set("test") 
+    
     #Create the widgets
-    id_label = tk.Label(root,
-        text ="Input the ID\nin the box below:", font = ('calibri', 20))
-    id_entry = tk.Entry(root, width=40, font=('calibri', 15))
-    save_button = ttk.Button(root, text="Save ID",style="B2.TButton", command=save_id)
-  
+    id_label = tk.Label(root,text ="Select the ID:", font = ('calibri', 20))
+    drop = tk.OptionMenu( root , clicked_id , *options)
+    drop.config(width = 9, font = ('calibri', 20), bg = "gainsboro")
+    newid_button = ttk.Button(root, text="New ID",style="B2.TButton", command=openIDwindow)
+   
     protocol_label = tk.Label(root, text="Select the protocol\n to record:", font=('calibri', 20))
 
-    button1 = ttk.Button(root, text="Control",style="TButton", command = lambda: [base_protocol(inlet, "control", n_rep)])
-    button2 = ttk.Button(root, text="Robot",style="TButton", command = lambda: [base_protocol(inlet, "robot", n_rep)])
-    button3 = ttk.Button(root, text="Video",style="TButton", command = lambda: [base_protocol(inlet, "video", n_rep)])
-    button4 = ttk.Button(root, text="VR",style="TButton", command = lambda: [base_protocol(inlet, "vr", n_rep)])
+    button1 = ttk.Button(root, text="Control",style="TButton", command = lambda: [base_protocol(inlet, "control", n_rep, clicked_id)])
+    button2 = ttk.Button(root, text="Robot",style="TButton", command = lambda: [base_protocol(inlet, "robot", n_rep, clicked_id)])
+    button3 = ttk.Button(root, text="Video",style="TButton", command = lambda: [base_protocol(inlet, "video", n_rep, clicked_id)])
+    button4 = ttk.Button(root, text="VR",style="TButton", command = lambda: [base_protocol(inlet, "vr", n_rep, clicked_id)])
     
     exit_button = ttk.Button(root, text="Exit", style="B3.TButton",command = root.destroy)
 
     # Pack the widgets vertically
     id_label.pack(pady = 10)
-    id_entry.pack(pady = 10, padx = 50)
-    save_button.pack(pady = 10)
+    drop.pack(pady = 10, padx = 50) 
+    newid_button.pack(pady = 10)
 
     protocol_label.pack(pady=7)
     button1.pack(pady = 7)
