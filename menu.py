@@ -151,8 +151,7 @@ def participant_setup(clicked_id, n_rep):
 def base_protocol(inlet, protocol_type, n_rep, clicked_id):
 
     id, movements_list = participant_setup(clicked_id, n_rep)
-    return
-
+    
     #Connections
     if protocol_type == 'robot':
         if not robot_connect():
