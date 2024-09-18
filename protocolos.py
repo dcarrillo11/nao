@@ -37,12 +37,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
         else:
             pass
     else:
-        if protocol_type == 'control':
-            play_video_3('./Media/Relax.mp4')
-        elif protocol_type == ('video' or 'robot'):
-            play_audio('./Media/Relax.mp3')
-        else:
-            pass
+        pass
 
     print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
     data_dict = record_data(relax_time, inlet)
@@ -76,11 +71,11 @@ def robot_protocol(mov):
 def video_protocol(mov):
 
     if mov == 'right':
-        play_video_3('./Media/alphamini_right_front.mp4')
+        play_video_3('./Media/alphamini_right_sound.mp4')
     elif mov == 'left':
-        play_video_3('./Media/alphamini_left_front.mp4')
+        play_video_3('./Media/alphamini_left_sound.mp4')
     else:
-        play_video_3('./Media/alphamini_both_front.mp4')  
+        play_video_3('./Media/alphamini_both_sound.mp4')  
 
 
 def vr_protocol(movements_list, device = None):
