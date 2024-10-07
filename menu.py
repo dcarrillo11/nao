@@ -7,7 +7,7 @@ import random
 from datetime import date, datetime
 import json
 
-import psutil
+import shutil
 import pandas as pd
 import matplotlib.pyplot as plt 
 import tkinter as tk
@@ -157,6 +157,10 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
         if not robot_connect():
             return
     elif protocol_type == 'vr':
+        shutil.copy('./participants.json', '../verge3d/alphamini/participants.json')
+        f = open("../verge3d/alphamini/user.txt", "w")
+        f.write(id)
+        f.close()
         adb_ready, adb_device = android_connect()
         if not adb_ready:
             return
@@ -284,7 +288,7 @@ def main():
                 messagebox.showerror(title="ID error", message = "El usuario %s ya existe" % id)
 
             
-            print(f"ID guardado: {id}")
+            print(f"ID guardado: {newid}")
             IDWindow.destroy()
 
         IDWindow = tk.Toplevel(root)
