@@ -30,12 +30,13 @@ from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 from movie_editor import vr_maker
 
+
 class Recorder(threading.Thread):
 
     columns = ['Time',"FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2", 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
     data_dict = dict((k, []) for k in columns)
     
-    def __init__(self, inlet, duration, fs = 250):
+    def __init__(self, inlet, duration = 10, fs = 250):
         super(Recorder,self).__init__()
         self.inlet = inlet
         self.duration = duration
@@ -185,18 +186,19 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             'video': video_protocol,
             'vr': vr_protocol}
     
-    record_times = {'control': 10, 
-            'robot': 10, 
-            'video': 10, 
-            'vr': 5}
+    record_time = 10
 
     for rep in range(len(movements_list)):
     
         df_iter= f"df_{rep}"
 
-        options.get(protocol_type)(movements_list[rep])
+        session_recorder = Recorder(inlet, record_time)
         print('empiezo a anotar')
-        data_dict = record_data(record_times.get(protocol_type), inlet)
+        options.get(protocol_type)(movements_list[rep])
+        time.sleep(record_time + 0.1)
+        
+        data_dict = session_recorder.data_dict
+        print("saved dict")
         globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
 
         if movements_list[rep] == 'right':
@@ -239,8 +241,6 @@ def main():
     #####################
     #Protocol parameters#
     #####################
-    relax_time = 5 #Initial relax seconds
-    record_time = 10 #Motor imagery seconds
     left_electrodes = ['FC1', 'C3', 'C1', 'CP1']
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
     included_electrodes = ["FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2"]
