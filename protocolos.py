@@ -29,19 +29,25 @@ from movie_editor import vr_maker
 
 def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
+    relax_recorder = Recorder(inlet,relax_time)
+    relax_recorder.start()
+
+    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+
     if start:
         if protocol_type == 'control':
-            play_video_3('./Media/Comienzo.mp4')
-        elif protocol_type == ('video' or 'robot'):
-            play_video_3('./Media/Comienzo_detalle.mp4')
+            play_video_3('./Media/Comienzo_control.mp4')
+        elif protocol_type == 'video':
+            play_video_3('./Media/Comienzo_video.mp4')
+        elif protocol_type == 'robot':
+            play_video_3('./Media/Comienzo.mp3')
         else:
             pass
     else:
         pass
 
-    relax_recorder = Recorder(inlet,relax_time)
-    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
     time.sleep(relax_time+0.1)
+
     print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     data_dict = relax_recorder.data_dict

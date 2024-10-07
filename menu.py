@@ -171,11 +171,8 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
         f = open('../verge3d/alphamini/user.txt', 'w')
         f.write(id)
         f.close()
-        adb_ready, adb_device = android_connect()
-        if not adb_ready:
-            return
-        else:
-            vr_protocol(movements_list, adb_device)
+    else:
+        pass
 
     #Protocol Initiation
     df_list = [relax_protocol(inlet, protocol_type, relax_time = 5)]      
@@ -187,12 +184,13 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             'vr': vr_protocol}
     
     record_time = 10
+    session_recorder = Recorder(inlet, record_time)
 
     for rep in range(len(movements_list)):
     
         df_iter= f'df_{rep}'
 
-        session_recorder = Recorder(inlet, record_time)
+        session_recorder.start()
         print('Empiezo a anotar')
         options.get(protocol_type)(movements_list[rep])
         time.sleep(record_time + 0.1)
@@ -266,7 +264,7 @@ def main():
         streams = resolve_stream()
         inlet = StreamInlet(streams[0])
     except:
-        messagebox.showerror(title="Conection error", message = "Unicorn Brain Interface está desconectado")
+        messagebox.showerror(title='Conection error', message = 'Unicorn Brain Interface está desconectado')
         sys.exit(1) """
     inlet = []
 
@@ -277,7 +275,6 @@ def main():
     root = tk.Tk()
     root.geometry('300x600+600+100')
     root.title('Protocol GUI')
-
 
     def openIDwindow():
 
@@ -295,7 +292,6 @@ def main():
             else:
                 messagebox.showerror(title='ID error', message = 'El usuario %s ya existe' % id)
 
-            
             print(f'ID guardado: {newid}')
             IDWindow.destroy()
 
@@ -344,7 +340,7 @@ def main():
     #Create the widgets
     id_label = tk.Label(root,text ='Select the ID:', font = ('calibri', 20))
     drop = tk.OptionMenu( root , clicked_id , *options)
-    drop.config(width = 9, font = ('calibri', 20), bg = "gainsboro")
+    drop.config(width = 9, font = ('calibri', 20), bg = 'gainsboro')
     newid_button = ttk.Button(root, text='New ID",style="B2.TButton', command=openIDwindow)
    
     protocol_label = tk.Label(root, text='Select the protocol\n to record:', font=('calibri', 20))
