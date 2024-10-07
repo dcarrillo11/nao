@@ -33,7 +33,7 @@ from movie_editor import vr_maker
 
 class Recorder(threading.Thread):
 
-    columns = ['Time',"FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2", 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
+    columns = ['Time','FC1','FC2','C3','C1','C2','C4','CP1','CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
     data_dict = dict((k, []) for k in columns)
     
     def __init__(self, inlet, duration = 10, fs = 250):
@@ -70,9 +70,9 @@ def check_and_rename(file_path, add = 0):
 
     original_file_path = file_path
     if add != 0:
-        split = file_path.rsplit(".", 1)
-        part_1 = split[0] + "_" + str(add)
-        file_path = ".".join([part_1, split[1]])
+        split = file_path.rsplit('.', 1)
+        part_1 = split[0] + '_' + str(add)
+        file_path = '.'.join([part_1, split[1]])
     if not os.path.isfile(file_path):
         return file_path
     else:
@@ -88,7 +88,7 @@ def robot_connect():
         asyncio.get_event_loop().run_until_complete(test_connect(device_robot))
         return True
     else:
-        messagebox.showerror(title="Conection error", message = "Alphamini está desconectado")
+        messagebox.showerror(title='Conection error', message = 'Alphamini está desconectado')
         return False
 
 
@@ -112,11 +112,11 @@ def arm_setup(n_rep):
     # Agregamos "izquierdo", "derecho" y "ambos" 
     for rep in range(n_rep):
         if rep < (n_rep/3):
-            movements.append("left")
+            movements.append('left')
         elif rep >=(n_rep/3) and rep<((2*n_rep)/3):
-            movements.append("right")
+            movements.append('right')
         else:
-            movements.append("both")
+            movements.append('both')
     
     while True:
         # Shuffle the list randomly
@@ -168,7 +168,7 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             return
     elif protocol_type == 'vr':
         shutil.copy('./participants.json', '../verge3d/alphamini/participants.json')
-        f = open("../verge3d/alphamini/user.txt", "w")
+        f = open('../verge3d/alphamini/user.txt', 'w')
         f.write(id)
         f.close()
         adb_ready, adb_device = android_connect()
@@ -190,44 +190,43 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
 
     for rep in range(len(movements_list)):
     
-        df_iter= f"df_{rep}"
+        df_iter= f'df_{rep}'
 
         session_recorder = Recorder(inlet, record_time)
-        print('empiezo a anotar')
+        print('Empiezo a anotar')
         options.get(protocol_type)(movements_list[rep])
         time.sleep(record_time + 0.1)
         
         data_dict = session_recorder.data_dict
-        print("saved dict")
         globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
 
         if movements_list[rep] == 'right':
             
             globals()[df_iter]['STI'] = 1 #right_label
             df_list.append(globals()[df_iter])
-            print("dch anotado\n")
+            print('dch anotado\n')
             
         elif movements_list[rep]=='left':
 
             globals()[df_iter]['STI'] = 2 #left label
             df_list.append(globals()[df_iter])
-            print("izq anotado\n")
+            print('izq anotado\n')
 
         elif movements_list[rep]=='both':
             
             globals()[df_iter]['STI'] = 3 #both label
             df_list.append(globals()[df_iter])
-            print("ambos anotados\n")
+            print('ambos anotados\n')
         
         df_relax = relax_protocol(inlet, protocol_type, relax_time = 4, start = False)
         df_list.append(df_relax)
 
         if rep == (n_rep -1):
-            if protocol_type == "vr":
+            if protocol_type == 'vr':
                 time.sleep(5)
                 stop_vr(adb_device)
             else:
-                play_video_3("./Media/Fin.mp4", end = True)
+                play_video_3('./Media/Fin.mp4', end = True)
 
     complete_df = pd.concat(df_list, ignore_index=True)
     complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
@@ -243,7 +242,7 @@ def main():
     #####################
     left_electrodes = ['FC1', 'C3', 'C1', 'CP1']
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
-    included_electrodes = ["FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2"]
+    included_electrodes = ['FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2']
     fs = 250
     n_rep = 3 #Number of Imagery-Execution
 
@@ -251,8 +250,8 @@ def main():
     newid_flag = False
 
     #Participants
-    if not os.path.isfile("participants.json"):
-        participants = {"test" : [["both", "left", "right"],0]}
+    if not os.path.isfile('participants.json'):
+        participants = {'test' : [['both', 'left', 'right'],0]}
         with open('participants.json', 'w') as file:
             json.dump(participants, file)
     else:
@@ -276,8 +275,8 @@ def main():
     ##########################
 
     root = tk.Tk()
-    root.geometry("300x600+600+100")
-    root.title("Protocol GUI")
+    root.geometry('300x600+600+100')
+    root.title('Protocol GUI')
 
 
     def openIDwindow():
@@ -294,22 +293,22 @@ def main():
                 newid_flag = True
                 print(newid_flag)
             else:
-                messagebox.showerror(title="ID error", message = "El usuario %s ya existe" % id)
+                messagebox.showerror(title='ID error', message = 'El usuario %s ya existe' % id)
 
             
-            print(f"ID guardado: {newid}")
+            print(f'ID guardado: {newid}')
             IDWindow.destroy()
 
         IDWindow = tk.Toplevel(root)
  
-        IDWindow.title("New ID")
+        IDWindow.title('New ID')
     
         # sets the geometry of toplevel
-        IDWindow.geometry("300x220")
+        IDWindow.geometry('300x220')
     
-        newid_label = tk.Label(IDWindow,text ="Input the ID\nin the box below:", font = ('calibri', 20))
+        newid_label = tk.Label(IDWindow,text ='Input the ID\nin the box below:', font = ('calibri', 20))
         id_entry = tk.Entry(IDWindow, width=40, font=('calibri', 15))
-        save_button = ttk.Button(IDWindow, text="Save ID",style="B2.TButton", command=save_newid)
+        save_button = ttk.Button(IDWindow, text='Save ID",style="B2.TButton', command=save_newid)
 
         newid_label.pack(pady = 10)
         id_entry.pack(pady = 10, padx = 50)
@@ -340,22 +339,22 @@ def main():
     #Dropdown Menu config
     options = participants.keys()
     clicked_id = tk.StringVar() 
-    clicked_id.set("test") 
+    clicked_id.set('test') 
     
     #Create the widgets
-    id_label = tk.Label(root,text ="Select the ID:", font = ('calibri', 20))
+    id_label = tk.Label(root,text ='Select the ID:', font = ('calibri', 20))
     drop = tk.OptionMenu( root , clicked_id , *options)
     drop.config(width = 9, font = ('calibri', 20), bg = "gainsboro")
-    newid_button = ttk.Button(root, text="New ID",style="B2.TButton", command=openIDwindow)
+    newid_button = ttk.Button(root, text='New ID",style="B2.TButton', command=openIDwindow)
    
-    protocol_label = tk.Label(root, text="Select the protocol\n to record:", font=('calibri', 20))
+    protocol_label = tk.Label(root, text='Select the protocol\n to record:', font=('calibri', 20))
 
-    button1 = ttk.Button(root, text="Control",style="TButton", command = lambda: [base_protocol(inlet, "control", n_rep, clicked_id)])
-    button2 = ttk.Button(root, text="Robot",style="TButton", command = lambda: [base_protocol(inlet, "robot", n_rep, clicked_id)])
-    button3 = ttk.Button(root, text="Video",style="TButton", command = lambda: [base_protocol(inlet, "video", n_rep, clicked_id)])
-    button4 = ttk.Button(root, text="VR",style="TButton", command = lambda: [base_protocol(inlet, "vr", n_rep, clicked_id)])
+    button1 = ttk.Button(root, text='Control',style='TButton', command = lambda: [base_protocol(inlet, 'control', n_rep, clicked_id)])
+    button2 = ttk.Button(root, text='Robot',style='TButton', command = lambda: [base_protocol(inlet, 'robot', n_rep, clicked_id)])
+    button3 = ttk.Button(root, text='Video',style='TButton', command = lambda: [base_protocol(inlet, 'video', n_rep, clicked_id)])
+    button4 = ttk.Button(root, text='VR',style='TButton', command = lambda: [base_protocol(inlet, 'vr', n_rep, clicked_id)])
     
-    exit_button = ttk.Button(root, text="Exit", style="B3.TButton",command = root.destroy)
+    exit_button = ttk.Button(root, text='Exit', style='B3.TButton',command = root.destroy)
 
     # Pack the widgets vertically
     id_label.pack(pady = 10)
