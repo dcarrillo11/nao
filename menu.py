@@ -6,6 +6,7 @@ import asyncio
 import random
 from datetime import date, datetime
 import json
+import threading
 
 import shutil
 import pandas as pd
@@ -29,6 +30,40 @@ from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 from movie_editor import vr_maker
 
+class Recorder(threading.Thread):
+
+    columns = ['Time',"FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2", 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
+    data_dict = dict((k, []) for k in columns)
+    
+    def __init__(self, inlet, duration, fs = 250):
+        super(Recorder,self).__init__()
+        self.inlet = inlet
+        self.duration = duration
+        self.fs = fs
+
+    def run(self):
+        
+        finished = False
+        while not finished:
+
+            data, timestamp = self.inlet.pull_sample()
+            #print("got %s at time %s" % (data[0], timestamp))
+            #timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
+            #The timestamp you get is the seconds since the computer was turned on,
+            #so we add to the timestamp the date when the computer was started (psutil.boot_time())
+
+            all_data = [timestamp] + data
+
+            rep = 0
+            for key in list(self.data_dict.keys()):
+                self.data_dict[key].append(all_data[rep])
+                rep = rep + 1
+            
+            if len(self.data_dict['Time']) >= self.fs*self.duration:
+                finished = True
+
+        return self.data_dict
+        
 
 def check_and_rename(file_path, add = 0):
 
@@ -54,32 +89,6 @@ def robot_connect():
     else:
         messagebox.showerror(title="Conection error", message = "Alphamini está desconectado")
         return False
-
-
-def record_data(duration, inlet, fs = 250):
-    columns = ['Time',"FC1", "FC2", "C3", "C1", "C2", "C4", "CP1", "CP2", 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
-    data_dict = dict((k, []) for k in columns)
-    finished = False
-    while not finished:
-
-        data, timestamp = inlet.pull_sample()
-        #print("got %s at time %s" % (data[0], timestamp))
-
-        #timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
-        #The timestamp you get is the seconds since the computer was turned on,
-        #so we add to the timestamp the date when the computer was started (psutil.boot_time())
-
-        all_data = [timestamp] + data
-
-        rep = 0
-        for key in list(data_dict.keys()):
-            data_dict[key].append(all_data[rep])
-            rep = rep + 1
-        
-        if len(data_dict['Time']) >= fs*duration:
-            finished = True
-
-    return data_dict
 
 
 def play_video_3(videopath, end = False):
