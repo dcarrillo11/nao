@@ -17,6 +17,12 @@ def kill_server():
     Popen(['adb.exe', 'kill-server'], stderr=PIPE, stdout=PIPE)
     print("daemon server offline")
 
+
+def adb_wifi():
+
+    subprocess.run(['adb_connects.sh'],shell=True, check=True)
+    messagebox.showinfo(title="adb wifi", message = "Ya puedes desconectar el cable")
+
 def android_connect():
 
     start_server()
@@ -25,17 +31,12 @@ def android_connect():
     devices = adb.devices()
 
     if len(devices) == 0:
-        messagebox.showerror(title="Conection error", message = "Móvil desconectado o innaccesible")
+        messagebox.showerror(title="Conection error", message = "Dispositivo desconectado o innaccesible")
         return False, []
     else:
+        adb_wifi()
         device = devices[0]
         return True, device
-
-def adb_wifi():
-
-    subprocess.run(['adb_connect.sh'],shell=True, check=True)
-    messagebox.showinfo(title="adb wifi", message = "Ya puedes desconectar el cable")
-
 
 def unlock(device):
 
@@ -53,7 +54,8 @@ def unlock(device):
         device.shell(f'input keyevent 3')
 
  
-def start_vr_mobile(device): 
+
+def start_vr(device):
 
     #device.push("./media/merged.mp4", "/sdcard/Alphamini/merged.mp4")
 
