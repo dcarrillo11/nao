@@ -1,6 +1,7 @@
 
 import time
 from subprocess import Popen,PIPE
+import subprocess
 from ppadb.client import Client
 from tkinter import messagebox
 
@@ -30,6 +31,12 @@ def android_connect():
         device = devices[0]
         return True, device
 
+def adb_wifi():
+
+    subprocess.run(['adb_connect.sh'],shell=True, check=True)
+    messagebox.showinfo(title="adb wifi", message = "Ya puedes desconectar el cable")
+
+
 def unlock(device):
 
     screen_state = device.shell(f'dumpsys display | grep mScreenState=')
@@ -46,8 +53,7 @@ def unlock(device):
         device.shell(f'input keyevent 3')
 
  
-
-def start_vr(device):
+def start_vr_mobile(device): 
 
     #device.push("./media/merged.mp4", "/sdcard/Alphamini/merged.mp4")
 
@@ -74,8 +80,10 @@ def stop_vr(device):
     kill_server()
 
 def main():
-    vr_flag, device_adb = android_connect()
-    start_vr(device_adb)
+    device_adb = android_connect()
+    print(device_adb)
+    adb_wifi()
+    #start_vr(device_adb)
 
 if __name__ == '__main__':
     main()
