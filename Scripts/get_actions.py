@@ -31,6 +31,8 @@ from pylsl import StreamInlet, resolve_stream
 from pydub import AudioSegment
 from pydub.playback import play
 
+from test_audio import test_play_tts, test_play_local_audio
+
 
 MiniSdk.set_robot_type(MiniSdk.RobotType.EDU) #tipo de robot
 #Encontrar robot (device) en la red WiFi:
@@ -41,6 +43,9 @@ if device: #Si lo encuentra, se conecta
 
 #actions_list = asyncio.get_event_loop().run_until_complete(get_action_list())
 #np.savetxt("Actionsextra.csv",actions_list, delimiter=", ", fmt = '% s')
+
+asyncio.get_event_loop().run_until_complete(test_play_tts())
+asyncio.get_event_loop().run_until_complete(test_play_local_audio())
 
 asyncio.get_event_loop().run_until_complete(test_play_action('face_028b'))
 asyncio.get_event_loop().run_until_complete(test_play_action('Surveillance_004'))

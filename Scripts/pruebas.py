@@ -1,59 +1,130 @@
-from ppadb.client import Client
+from subprocess import Popen,PIPE
+
+import os
+import sys
 import time
+import asyncio
+import random
+from datetime import date, datetime
+import threading
+
+import psutil
+import pandas as pd
+import matplotlib.pyplot as plt 
+import tkinter as tk
+import tkinter.ttk as ttk
 from tkinter import messagebox
+#import cv2 as cv
+import pygame
+from moviepy.editor import VideoFileClip
+from pydub import AudioSegment
+from pydub.playback import play
+from pylsl import StreamInlet, resolve_stream
 
+import mini.mini_sdk as MiniSdk
+from mini.apis import *
+from mini.dns.dns_browser import WiFiDevice
 
-def android_connect():
+class Recorder(threading.Thread):
 
-    adb = Client(host="127.0.0.1", port=5037)
-    devices = adb.devices() 
-
-    if len(devices) == 0:
-        messagebox.showerror(title="Conection error", message = "Móvil desconectado o innaccesible")
-        return False, []
-    else:
-        device = devices[0]
-        return True, device
+    columns = ['Time','FC1','FC2','C3','C1','C2','C4','CP1','CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
+    data_dict = dict((k, []) for k in columns)
     
-def start_vr(device):
+    def __init__(self, inlet, duration = 10, fs = 250):
+        super(Recorder,self).__init__()
+        self.inlet = inlet
+        self.duration = duration
+        self.fs = fs
 
-    screen_state = device.shell(f'dumpsys display | grep -oE "mScreenState=..."')
-    screen_lock = device.shell(f'dumpsys window | grep -oE "mDreamingLockscreen=....."')
-    print(screen_state, screen_lock)
+    def run(self):
+        
+        finished = False
+        while not finished:
 
-    if "OFF" in screen_state:
-        device.shell(f'input keyevent 26')
-        device.shell(f'input swipe 930 2500 1080 380')
-        device.shell(f'input text "9420"')
-    elif "true" in screen_lock:
-        device.shell(f'input swipe 930 2500 1080 380')
-        device.shell(f'input text "9420"')
+            data, timestamp = self.inlet.pull_sample()
+            #print("got %s at time %s" % (data[0], timestamp))
+            #timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
+            #The timestamp you get is the seconds since the computer was turned on,
+            #so we add to the timestamp the date when the computer was started (psutil.boot_time())
+
+            all_data = [timestamp] + data
+
+            rep = 0
+            for key in list(self.data_dict.keys()):
+                self.data_dict[key].append(all_data[rep])
+                rep = rep + 1
+            
+            if len(self.data_dict['Time']) >= self.fs*self.duration:
+                finished = True
+
+        return self.data_dict
+
+def play_video_3(videopath, end = False):
+
+    clip = VideoFileClip(videopath, target_resolution=(720,1280))
+    clip.preview()
+
+    duration = clip.duration
+
+    if end:
+        pygame.quit()
+
+    return duration
+
+def play_audio(audiopath):
+    
+    audio = AudioSegment.from_file(audiopath)
+    play(audio)
+
+    return audio.duration_seconds
+
+
+def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
+
+    if start:
+        if protocol_type == 'control':
+            wait_time = play_video_3('../Media/Comienzo_control.mp4')
+        elif protocol_type == 'video':
+            play_video_3('../Media/Comienzo_video.mp4')
+        elif protocol_type == 'robot':
+            wait_time = play_audio('../Media/Comienzo.mp3')
+        else:
+            pass
     else:
-        device.shell(f'input keyevent 3')
+        pass
 
-    device.shell(f'pm clear com.xojot.vrplayer')
-    device.shell(f'media volume --set 0')
-    device.shell(f'am start -n com.xojot.vrplayer/.MainActivity')
-    time.sleep(2)
-    device.shell(f'input tap 530 2880')
-    device.shell(f'input tap 530 2880')
-    device.shell(f'input tap 400 950')
-    time.sleep(1)
-    device.shell(f'input tap 1350 1550')
-    device.shell(f'input tap 600 1500')
-    device.shell(f'input tap 210 2680')
-    device.shell(f'input tap 1350 100')
-    device.shell(f'input tap 1300 720')
-    time.sleep(2.5)
-    device.shell(f'media volume --set 7')
-    device.shell(f'input tap 1500 720')
+    print("klk")
+    #time.sleep(wait_time)
 
-def stop_vr(device):
-    device.shell(f'pm clear com.xojot.vrplayer')
+    relax_recorder = Recorder(inlet,relax_time)
+    relax_recorder.start()
+
+    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+
+    time.sleep(relax_time+0.1)
+
+    print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+
+    data_dict = relax_recorder.data_dict
+    df_relax = pd.DataFrame.from_dict(data_dict)
+    df_relax['STI'] = 4 #Relax label for the data
+
+    if start:
+        if protocol_type == ('control' or 'robot'):
+            play_audio('../Media/vamos_a_comenzar.m4a')
+        elif protocol_type == 'video':
+            play_video_3('../Media/vamos_a_comenzar.mp4')
+        else:
+            pass
+    else:
+        pass
+
+    return df_relax
 
 def main():
-    flag, device_adb = android_connect()
-    start_vr(device_adb)
+    inlet = []
+    dict = relax_protocol(inlet, 'video', relax_time = 10, start = True)
+    print(dict)
 
 if __name__ == '__main__':
     main()
