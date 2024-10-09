@@ -97,13 +97,19 @@ def play_video_3(videopath, end = False):
     clip = VideoFileClip(videopath, target_resolution=(720,1280))
     clip.preview(fullscreen = True)
 
+    duration = clip.duration
+
     if end:
         pygame.quit()
+
+    return duration
 
 def play_audio(audiopath):
     
     audio = AudioSegment.from_file(audiopath)
     play(audio)
+
+    return audio.duration_seconds
 
 
 def arm_setup(n_rep):
@@ -165,17 +171,21 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
     #Connections
     if protocol_type == 'robot':
         if not robot_connect():
+            messagebox.showerror(title='Conection error', message = 'Alphamini está desconectado')
             return
     elif protocol_type == 'vr':
+        vr_flag, vr_device = android_connect()
         shutil.copy('./participants.json', '../verge3d/alphamini/participants.json')
         f = open('../verge3d/alphamini/user.txt', 'w')
         f.write(id)
         f.close()
+        time.sleep(5)
+        messagebox.askokcancel(title='Virtual Reality Protocol', message= 'Press OK to start the recording')
     else:
         pass
 
     #Protocol Initiation
-    df_list = [relax_protocol(inlet, protocol_type, relax_time = 5)]      
+    df_list = [relax_protocol(inlet, protocol_type, relax_time = 10)]      
         
     #Choosen Protocol Execution
     options = {'control': control_protocol, 
@@ -183,7 +193,7 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             'video': video_protocol,
             'vr': vr_protocol}
     
-    record_time = 10
+    record_time = 4.05
     session_recorder = Recorder(inlet, record_time)
 
     for rep in range(len(movements_list)):
@@ -216,15 +226,16 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             df_list.append(globals()[df_iter])
             print('ambos anotados\n')
         
-        df_relax = relax_protocol(inlet, protocol_type, relax_time = 4, start = False)
+        df_relax = relax_protocol(inlet, protocol_type, relax_time = 5, start = False)
         df_list.append(df_relax)
 
         if rep == (n_rep -1):
-            if protocol_type == 'vr':
-                time.sleep(5)
-                stop_vr(adb_device)
+            if protocol_type == ('control' or 'robot'):
+                play_audio('./Media/fin.mp3')
+            elif protocol_type == 'video':
+                play_video_3('./Media/fin_mini.mp4')
             else:
-                play_video_3('./Media/Fin.mp4', end = True)
+                pass
 
     complete_df = pd.concat(df_list, ignore_index=True)
     complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']

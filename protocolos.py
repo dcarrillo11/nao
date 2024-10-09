@@ -29,30 +29,48 @@ from movie_editor import vr_maker
 
 def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
-    relax_recorder = Recorder(inlet,relax_time)
-    relax_recorder.start()
-
-    print('Inicio relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+    print('Empieza el protocolo relax'+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     if start:
         if protocol_type == 'control':
-            play_video_3('./Media/Comienzo_control.mp4')
+            wait_time = play_video_3('./Media/comienzo_control.mp4')
         elif protocol_type == 'video':
-            play_video_3('./Media/Comienzo_video.mp4')
+            wait_time = play_video_3('./Media/comienzo_mini.mp4')
         elif protocol_type == 'robot':
-            play_video_3('./Media/Comienzo.mp3')
+            wait_time = play_audio('./Media/comienzo.mp3')
         else:
             pass
     else:
         pass
 
+    time.sleep(wait_time)
+
+    relax_recorder = Recorder(inlet,relax_time)
+    relax_recorder.start()
+
+    print('Inicio grabación relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+
     time.sleep(relax_time+0.1)
 
-    print('Fin relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
+    print('Fin grabación relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     data_dict = relax_recorder.data_dict
     df_relax = pd.DataFrame.from_dict(data_dict)
     df_relax['STI'] = 4 #Relax label for the data
+
+    if start:
+        time.sleep(3.25)
+        if protocol_type == ('control' or 'robot'):
+            play_audio('./Media/vamos_a_comenzar.mp3')
+        elif protocol_type == 'video':
+            play_video_3('./Media/vamos_a_comenzar.mp4')
+        else:
+            pass
+        time.sleep(6) #3.25 + 6 = 9 para adecuarse a los tempos del protocolo VR
+    else:
+        pass
+
+    print('Fin protocolo relax '+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     return df_relax
 
@@ -87,14 +105,8 @@ def video_protocol(mov):
         play_video_3('./Media/alphamini_both_sound.mp4')  
 
 
-def vr_protocol(movements_list, device = None):
-    
-    if type(movements_list) is list:
-        #vr_maker(movements_list)
-        start_vr(device)
-        time.sleep(23)
-    else:
-        pass
+def vr_protocol():
+    pass
 
 def main():
     pass
