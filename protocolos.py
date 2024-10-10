@@ -22,7 +22,7 @@ import mini.mini_sdk as MiniSdk
 from mini.apis import *
 from mini.dns.dns_browser import WiFiDevice
 
-from menu import play_video_3, play_audio, Recorder
+from utils import play_video_3, play_audio, Recorder
 from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 from movie_editor import vr_maker
@@ -43,7 +43,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     else:
         pass
 
-    time.sleep(wait_time)
+    #time.sleep(wait_time)
 
     relax_recorder = Recorder(inlet,relax_time)
     relax_recorder.start()
@@ -57,6 +57,8 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     data_dict = relax_recorder.data_dict
     df_relax = pd.DataFrame.from_dict(data_dict)
     df_relax['STI'] = 4 #Relax label for the data
+
+    del relax_recorder
 
     if start:
         time.sleep(3.25)

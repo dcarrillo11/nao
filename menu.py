@@ -25,117 +25,12 @@ import mini.mini_sdk as MiniSdk
 from mini.apis import *
 from mini.dns.dns_browser import WiFiDevice
 
+from utils import *
 from protocolos import *
 from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 from movie_editor import vr_maker
-
-
-class Recorder(threading.Thread):
-
-    columns = ['Time','FC1','FC2','C3','C1','C2','C4','CP1','CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
-    data_dict = dict((k, []) for k in columns)
-    
-    def __init__(self, inlet, duration = 10, fs = 250):
-        super(Recorder,self).__init__()
-        self.inlet = inlet
-        self.duration = duration
-        self.fs = fs
-
-    def run(self):
         
-        finished = False
-        while not finished:
-
-            data, timestamp = self.inlet.pull_sample()
-            #print("got %s at time %s" % (data[0], timestamp))
-            #timestamp = datetime.fromtimestamp(psutil.boot_time() + timestamp)
-            #The timestamp you get is the seconds since the computer was turned on,
-            #so we add to the timestamp the date when the computer was started (psutil.boot_time())
-
-            all_data = [timestamp] + data
-
-            rep = 0
-            for key in list(self.data_dict.keys()):
-                self.data_dict[key].append(all_data[rep])
-                rep = rep + 1
-            
-            if len(self.data_dict['Time']) >= self.fs*self.duration:
-                finished = True
-
-        return self.data_dict
-        
-
-def check_and_rename(file_path, add = 0):
-
-    original_file_path = file_path
-    if add != 0:
-        split = file_path.rsplit('.', 1)
-        part_1 = split[0] + '_' + str(add)
-        file_path = '.'.join([part_1, split[1]])
-    if not os.path.isfile(file_path):
-        return file_path
-    else:
-        return check_and_rename(original_file_path, add + 1)
-
-
-def robot_connect():
-
-    MiniSdk.set_robot_type(MiniSdk.RobotType.EDU) #tipo de robot
-    #Encontrar robot (device) en la red WiFi:
-    device_robot: WiFiDevice = asyncio.get_event_loop().run_until_complete(test_get_device_by_name())
-    if device_robot: #Si lo encuentra, se conecta
-        asyncio.get_event_loop().run_until_complete(test_connect(device_robot))
-        return True
-    else:
-        messagebox.showerror(title='Conection error', message = 'Alphamini está desconectado')
-        return False
-
-
-def play_video_3(videopath, end = False):
-
-    clip = VideoFileClip(videopath, target_resolution=(720,1280))
-    clip.preview(fullscreen = True)
-
-    duration = clip.duration
-
-    if end:
-        pygame.quit()
-
-    return duration
-
-def play_audio(audiopath):
-    
-    audio = AudioSegment.from_file(audiopath)
-    play(audio)
-
-    return audio.duration_seconds
-
-
-def arm_setup(n_rep):
-    movements = list()
-
-    # Agregamos "izquierdo", "derecho" y "ambos" 
-    for rep in range(n_rep):
-        if rep < (n_rep/3):
-            movements.append('left')
-        elif rep >=(n_rep/3) and rep<((2*n_rep)/3):
-            movements.append('right')
-        else:
-            movements.append('both')
-    
-    while True:
-        # Shuffle the list randomly
-        random.shuffle(movements)
-
-        # Check if the list meets the constraint of no more than two consecutive elements of the same type
-        valid = True
-        for i in range(len(movements) - 2):
-            if movements[i] == movements[i+1] == movements[i+2]:
-                valid = False
-                break
-        if valid:
-            return movements
 
 def participant_setup(clicked_id, n_rep):
 
@@ -194,19 +89,21 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
             'vr': vr_protocol}
     
     record_time = 4.05
-    session_recorder = Recorder(inlet, record_time)
 
     for rep in range(len(movements_list)):
     
         df_iter= f'df_{rep}'
 
+        session_recorder = Recorder(inlet, record_time)
         session_recorder.start()
         print('Empiezo a anotar')
         options.get(protocol_type)(movements_list[rep])
         time.sleep(record_time + 0.1)
-        
+
         data_dict = session_recorder.data_dict
         globals()[df_iter] = pd.DataFrame.from_dict(data_dict)
+
+        del session_recorder
 
         if movements_list[rep] == 'right':
             
@@ -253,7 +150,7 @@ def main():
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
     included_electrodes = ['FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2']
     fs = 250
-    n_rep = 3 #Number of Imagery-Execution
+    n_rep = 15 #Number of Imagery-Execution
 
     global newid_flag
     newid_flag = False
@@ -271,13 +168,13 @@ def main():
     #Unicorn connection#
     ####################
 
-    """ try:
+    try:
         streams = resolve_stream()
         inlet = StreamInlet(streams[0])
     except:
         messagebox.showerror(title='Conection error', message = 'Unicorn Brain Interface está desconectado')
-        sys.exit(1) """
-    inlet = []
+        sys.exit(1)
+
 
     ##########################
     #Graphical User Interface#
@@ -300,10 +197,10 @@ def main():
                 global newid_flag
                 newid_flag = True
                 print(newid_flag)
+                print(f'ID guardado: {newid}')
             else:
-                messagebox.showerror(title='ID error', message = 'El usuario %s ya existe' % id)
+                messagebox.showerror(title='ID error', message = 'El usuario %s ya existe' %newid)
 
-            print(f'ID guardado: {newid}')
             IDWindow.destroy()
 
         IDWindow = tk.Toplevel(root)
@@ -315,7 +212,7 @@ def main():
     
         newid_label = tk.Label(IDWindow,text ='Input the ID\nin the box below:', font = ('calibri', 20))
         id_entry = tk.Entry(IDWindow, width=40, font=('calibri', 15))
-        save_button = ttk.Button(IDWindow, text='Save ID",style="B2.TButton', command=save_newid)
+        save_button = ttk.Button(IDWindow, text='Save ID',style='B2.TButton', command=save_newid)
 
         newid_label.pack(pady = 10)
         id_entry.pack(pady = 10, padx = 50)
@@ -352,7 +249,7 @@ def main():
     id_label = tk.Label(root,text ='Select the ID:', font = ('calibri', 20))
     drop = tk.OptionMenu( root , clicked_id , *options)
     drop.config(width = 9, font = ('calibri', 20), bg = 'gainsboro')
-    newid_button = ttk.Button(root, text='New ID",style="B2.TButton', command=openIDwindow)
+    newid_button = ttk.Button(root, text='New ID',style='B2.TButton', command=openIDwindow)
    
     protocol_label = tk.Label(root, text='Select the protocol\n to record:', font=('calibri', 20))
 
