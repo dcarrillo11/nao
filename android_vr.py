@@ -1,5 +1,6 @@
 
 import time
+import sys
 from subprocess import Popen,PIPE
 import subprocess
 from ppadb.client import Client
@@ -20,7 +21,7 @@ def kill_server():
 
 def adb_wifi():
 
-    subprocess.run(['adb_connects.sh'],shell=True, check=True)
+    subprocess.run(['adb_connect.sh'],shell=True, check=True)
     messagebox.showinfo(title="adb wifi", message = "Ya puedes desconectar el cable")
 
 def android_connect():
@@ -32,6 +33,7 @@ def android_connect():
 
     if len(devices) == 0:
         messagebox.showerror(title="Conection error", message = "Dispositivo desconectado o innaccesible")
+        sys.exit(1)
         return False, []
     else:
         adb_wifi()
@@ -84,7 +86,6 @@ def stop_vr(device):
 def main():
     device_adb = android_connect()
     print(device_adb)
-    adb_wifi()
     #start_vr(device_adb)
 
 if __name__ == '__main__':
