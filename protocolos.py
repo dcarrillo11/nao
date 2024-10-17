@@ -33,9 +33,9 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
     if start:
         if protocol_type == 'control':
-            wait_time = play_video_3('./Media/comienzo_control.mp4')
+            wait_time = play_video_3('./Media/control_comienzo.mp4')
         elif protocol_type == 'video':
-            wait_time = play_video_3('./Media/comienzo_mini.mp4')
+            wait_time = play_video_3('./Media/alphamini_comienzo.mp4')
         elif protocol_type == 'robot':
             wait_time = play_audio('./Media/comienzo.mp3')
         else:
@@ -62,10 +62,12 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
     if start:
         time.sleep(3.25)
-        if protocol_type == ('control' or 'robot'):
+        if protocol_type == 'control':
+            play_video_3('./Media/control_vamosacomenzar.mp4')
+        elif protocol_type == 'robot':
             play_audio('./Media/vamos_a_comenzar.mp3')
         elif protocol_type == 'video':
-            play_video_3('./Media/vamos_a_comenzar.mp4')
+            play_video_3('./Media/alphamini_vamosacomenzar.mp4')
         else:
             pass
         time.sleep(6) #3.25 + 6 = 9 para adecuarse a los tempos del protocolo VR
@@ -80,11 +82,11 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 def control_protocol(mov):
     
     if mov == 'right':
-        play_video_3('./Media/Imagina_dch.mp4')
+        play_video_3('./Media/control_right.mp4')
     elif mov == 'left':
-        play_video_3('./Media/Imagina_izq.mp4')
+        play_video_3('./Media/control_left.mp4')
     else:
-        play_video_3('./Media/Imagina_ambos.mp4')
+        play_video_3('./Media/control_both.mp4')
 
     
 def robot_protocol(mov):

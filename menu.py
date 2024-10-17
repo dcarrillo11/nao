@@ -127,10 +127,12 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
         df_list.append(df_relax)
 
         if rep == (n_rep -1):
-            if protocol_type == ('control' or 'robot'):
+            if protocol_type == 'control':
+                play_video_3('./Media/control_fin.mp4')
+            elif protocol_type == 'robot':
                 play_audio('./Media/fin.mp3')
             elif protocol_type == 'video':
-                play_video_3('./Media/fin_mini.mp4')
+                play_video_3('./Media/alphamini_fin.mp4')
             else:
                 pass
 
@@ -150,7 +152,7 @@ def main():
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
     included_electrodes = ['FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2']
     fs = 250
-    n_rep = 15 #Number of Imagery-Execution
+    n_rep = 3 #Number of Imagery-Execution
 
     global newid_flag
     newid_flag = False
