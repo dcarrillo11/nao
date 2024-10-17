@@ -98,8 +98,9 @@ def play_audio(audiopath):
     audio = AudioSegment.from_file(audiopath)
     play(audio)
 
-    return audio.duration_seconds
+    duration = audio.duration_seconds
 
+    return duration
 
 def arm_setup(n_rep):
     movements = list()

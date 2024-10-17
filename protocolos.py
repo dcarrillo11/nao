@@ -38,12 +38,12 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
             wait_time = play_video_3('./Media/alphamini_comienzo.mp4')
         elif protocol_type == 'robot':
             wait_time = play_audio('./Media/comienzo.mp3')
+            #check if audio stops execution
         else:
             pass
+        #time.sleep(wait_time)
     else:
         pass
-
-    #time.sleep(wait_time)
 
     relax_recorder = Recorder(inlet,relax_time)
     relax_recorder.start()
