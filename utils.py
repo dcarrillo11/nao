@@ -27,8 +27,6 @@ from mini.dns.dns_browser import WiFiDevice
 
 from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
-from movie_editor import vr_maker
-
 
 class Recorder(threading.Thread):
 
