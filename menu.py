@@ -29,7 +29,6 @@ from utils import *
 from protocolos import *
 from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
-from movie_editor import vr_maker
         
 
 def participant_setup(clicked_id, n_rep):
@@ -170,13 +169,13 @@ def main():
     #Unicorn connection#
     ####################
 
-    try:
+    """try:
         streams = resolve_stream()
         inlet = StreamInlet(streams[0])
     except:
         messagebox.showerror(title='Conection error', message = 'Unicorn Brain Interface está desconectado')
-        sys.exit(1)
-
+        sys.exit(1)"""
+    inlet = []
 
     ##########################
     #Graphical User Interface#
@@ -250,7 +249,7 @@ def main():
     #Create the widgets
     id_label = tk.Label(root,text ='Select the ID:', font = ('calibri', 20))
     drop = tk.OptionMenu( root , clicked_id , *options)
-    drop.config(width = 9, font = ('calibri', 20), bg = 'gainsboro')
+    drop.config(width = 6, font = ('calibri', 20), bg = 'gainsboro')
     newid_button = ttk.Button(root, text='New ID',style='B2.TButton', command=openIDwindow)
    
     protocol_label = tk.Label(root, text='Select the protocol\n to record:', font=('calibri', 20))
@@ -264,7 +263,7 @@ def main():
 
     # Pack the widgets vertically
     id_label.pack(pady = 10)
-    drop.pack(pady = 10, padx = 50) 
+    drop.pack(pady = 10, padx = 40) 
     newid_button.pack(pady = 10)
 
     protocol_label.pack(pady=7)
