@@ -127,11 +127,11 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
 
         if rep == (n_rep -1):
             if protocol_type == 'control':
-                play_video_3('./Media/control_fin.mp4')
+                play_video_3('./Media/control_fin.mp4', end = True)
             elif protocol_type == 'robot':
                 play_audio('./Media/fin.mp3')
             elif protocol_type == 'video':
-                play_video_3('./Media/alphamini_fin.mp4')
+                play_video_3('./Media/alphamini_fin.mp4', end = True)
             else:
                 pass
 
