@@ -86,6 +86,7 @@ def play_video_3(videopath, end = False):
     duration = clip.duration
 
     if end:
+        pygame.display.quit()
         pygame.quit()
 
     return duration

@@ -35,13 +35,12 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
         if protocol_type == 'control':
             wait_time = play_video_3('./Media/control_comienzo.mp4')
         elif protocol_type == 'video':
-            wait_time = play_video_3('./Media/alphamini_comienzo.mp4')
+            wait_time = play_video_3('./Media/nao_comienzo.mp4')
         elif protocol_type == 'robot':
             wait_time = play_audio('./Media/comienzo.mp3')
             #check if audio stops execution
         else:
-            pass
-        #time.sleep(wait_time)
+            time.sleep(24)
     else:
         pass
 
@@ -56,7 +55,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
 
     data_dict = relax_recorder.data_dict
     df_relax = pd.DataFrame.from_dict(data_dict)
-    df_relax['STI'] = 4 #Relax label for the data
+    df_relax['STI'] = 0 #Relax label for the data
 
     del relax_recorder
 
@@ -67,7 +66,7 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
         elif protocol_type == 'robot':
             play_audio('./Media/vamos_a_comenzar.mp3')
         elif protocol_type == 'video':
-            play_video_3('./Media/alphamini_vamosacomenzar.mp4')
+            play_video_3('./Media/nao_vamosacomenzar.mp4')
         else:
             pass
         time.sleep(6) #3.25 + 6 = 9 para adecuarse a los tempos del protocolo VR
@@ -102,14 +101,14 @@ def robot_protocol(mov):
 def video_protocol(mov):
 
     if mov == 'right':
-        play_video_3('./Media/alphamini_right_sound.mp4')
+        play_video_3('./Media/nao_right_sound.mp4')
     elif mov == 'left':
-        play_video_3('./Media/alphamini_left_sound.mp4')
+        play_video_3('./Media/nao_left_sound.mp4')
     else:
-        play_video_3('./Media/alphamini_both_sound.mp4')  
+        play_video_3('./Media/nao_both_sound.mp4')  
 
 
-def vr_protocol():
+def vr_protocol(mov):
     pass
 
 def main():

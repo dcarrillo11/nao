@@ -54,6 +54,9 @@ def participant_setup(clicked_id, n_rep):
         participants[id] = [movements_list, (participants[last_key][1] + 1)]
         with open('participants.json', 'w') as file:
             json.dump(participants, file)
+
+        path = './Results/{p}/'.format(p = id)
+        os.mkdir(path)
     
     return id, movements_list
 
@@ -127,16 +130,17 @@ def base_protocol(inlet, protocol_type, n_rep, clicked_id):
 
         if rep == (n_rep -1):
             if protocol_type == 'control':
-                play_video_3('./Media/control_fin.mp4')
+                play_video_3('./Media/control_fin.mp4', end = True)
             elif protocol_type == 'robot':
                 play_audio('./Media/fin.mp3')
             elif protocol_type == 'video':
-                play_video_3('./Media/alphamini_fin.mp4')
+                play_video_3('./Media/nao_fin.mp4', end = True)
             else:
                 pass
 
+
     complete_df = pd.concat(df_list, ignore_index=True)
-    complete_df.columns = ['Time', 'FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
+    complete_df.columns = ['Time', 'FC1', 'FCz', 'FC2', 'C3', 'C4', 'CP1', 'CPz', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation', 'STI']
     df_name = check_and_rename('./Results/{i}/{i}_{p}.csv'.format(p = protocol_type,i = id))
     complete_df.to_csv(df_name, index=False)
     print(df_name + ' saved!')
@@ -151,7 +155,7 @@ def main():
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
     included_electrodes = ['FC1', 'FC2', 'C3', 'C1', 'C2', 'C4', 'CP1', 'CP2']
     fs = 250
-    n_rep = 3 #Number of Imagery-Execution
+    n_rep = 15 #Number of Imagery-Execution
 
     global newid_flag
     newid_flag = False
@@ -169,20 +173,20 @@ def main():
     #Unicorn connection#
     ####################
 
-    """try:
+    try:
         streams = resolve_stream()
         inlet = StreamInlet(streams[0])
     except:
         messagebox.showerror(title='Conection error', message = 'Unicorn Brain Interface está desconectado')
-        sys.exit(1)"""
-    inlet = []
+        sys.exit(1)
+ 
 
     ##########################
     #Graphical User Interface#
     ##########################
 
     root = tk.Tk()
-    root.geometry('300x600+600+100')
+    root.geometry('300x650+600+100')
     root.title('Protocol GUI')
 
     def openIDwindow():
@@ -194,7 +198,6 @@ def main():
             newid = (id_entry.get()).lower()
             path = './Results/{p}/'.format(p = newid)
             if not os.path.exists(path):
-                os.mkdir(path)
                 global newid_flag
                 newid_flag = True
                 print(newid_flag)
@@ -219,6 +222,15 @@ def main():
         id_entry.pack(pady = 10, padx = 50)
         save_button.pack(pady = 10)
 
+    def refreshUser(drop, options, clicked_id):
+
+        options = list(options)
+        options.append(newid)
+        menu = drop['menu']
+        menu.delete(0,'end')
+        for i in options:
+            menu.add_command(label=i,command=lambda val=i: clicked_id.set(val))
+
     
     b1_style = ttk.Style()
     b1_style.configure('TButton', font =
@@ -240,6 +252,13 @@ def main():
             borderwidth = '3')
     b3_style.map('B3.TButton', foreground = [('active', '!disabled', 'red')],
                     background = [('active', 'black')])
+    
+    b4_style = ttk.Style()
+    b4_style.configure('B4.TButton', font =
+               ('calibri', 12),
+                    borderwidth = '3')
+    b4_style.map('B4.TButton', foreground = [('active', '!disabled', 'blue')],
+                     background = [('active', 'black')])
 
     #Dropdown Menu config
     options = participants.keys()
@@ -251,6 +270,7 @@ def main():
     drop = tk.OptionMenu( root , clicked_id , *options)
     drop.config(width = 6, font = ('calibri', 20), bg = 'gainsboro')
     newid_button = ttk.Button(root, text='New ID',style='B2.TButton', command=openIDwindow)
+    refresh_button = ttk.Button(root, text='Refresh',style='B4.TButton', command= lambda: [refreshUser(drop, options, clicked_id)])
    
     protocol_label = tk.Label(root, text='Select the protocol\n to record:', font=('calibri', 20))
 
@@ -265,8 +285,9 @@ def main():
     id_label.pack(pady = 10)
     drop.pack(pady = 10, padx = 40) 
     newid_button.pack(pady = 10)
+    refresh_button.pack(pady = 10)
 
-    protocol_label.pack(pady=7)
+    protocol_label.pack(pady=10)
     button1.pack(pady = 7)
     button2.pack(pady = 7)
     button3.pack(pady = 7)
