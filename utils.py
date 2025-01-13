@@ -9,6 +9,7 @@ import json
 import threading
 
 import shutil
+import psutil
 import pandas as pd
 import matplotlib.pyplot as plt 
 import tkinter as tk
@@ -29,15 +30,15 @@ from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 
 class Recorder(threading.Thread):
-
-    columns = ['Time','FC1','FC2','C3','C1','C2','C4','CP1','CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
-    data_dict = dict((k, []) for k in columns)
     
     def __init__(self, inlet, duration = 10, fs = 250):
         super(Recorder,self).__init__()
         self.inlet = inlet
         self.duration = duration
         self.fs = fs
+
+        columns = ['Time','FC1', 'FCz', 'FC2', 'C3', 'C4', 'CP1', 'CPz', 'CP2', 'AccX', 'AccY', 'AccZ', 'Gyro1', 'Gyro2', 'Gyro3', 'Battery', 'Counter', 'Validation']
+        self.data_dict = dict((k, []) for k in columns)
 
     def run(self):
         

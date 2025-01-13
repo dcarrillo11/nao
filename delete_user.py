@@ -39,10 +39,13 @@ def get_args():
 
 def main():
 
-    user_id = get_args()
-
     with open('participants.json', 'r') as file:
         participants = json.load(file)
+
+    print('Usuarios:')
+    [print('-',x) for x in sorted(participants.keys())]
+
+    user_id = str(input('Elija un usuario:'))
 
     path = './Results/{p}/'.format(p = user_id)
 

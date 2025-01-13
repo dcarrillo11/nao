@@ -5,6 +5,7 @@ import asyncio
 import random
 from datetime import date, datetime
 
+import subprocess
 import psutil
 import pandas as pd
 import matplotlib.pyplot as plt 
@@ -27,20 +28,31 @@ from test_connect import test_connect, test_get_device_by_name, test_play_action
 from android_vr import android_connect, start_vr, stop_vr
 
 
-def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
+def relax_protocol(inlet, protocol_type, ENG, relax_time = 10, start = True):
 
     print('Empieza el protocolo relax'+datetime.now().strftime('%Y%m%d%H%M')+'\n')
 
     if start:
         if protocol_type == 'control':
-            wait_time = play_video_3('./Media/control_comienzo.mp4')
+            if ENG:
+                wait_time = play_video_3('./Media/ENG_control_comienzo.mp4')
+            else:
+                wait_time = play_video_3('./Media/control_comienzo.mp4')
         elif protocol_type == 'video':
-            wait_time = play_video_3('./Media/nao_comienzo.mp4')
+            if ENG:
+                wait_time = play_video_3('./Media/ENG_nao_comienzo.mp4')
+            else:
+                wait_time = play_video_3('./Media/nao_comienzo.mp4')
         elif protocol_type == 'robot':
-            wait_time = play_audio('./Media/comienzo.mp3')
-            #check if audio stops execution
-        else:
+            if ENG:
+                move_command = "py -2 nao_controls.py --mode 1 --sound inicio --english True"  # launch your python2 script
+                process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
+            else:
+                move_command = "py -2 nao_controls.py --mode 1 --sound inicio"  # launch your python2 script
+                process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
             time.sleep(24)
+        else:
+            time.sleep(23)
     else:
         pass
 
@@ -62,14 +74,27 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     if start:
         time.sleep(3.25)
         if protocol_type == 'control':
-            play_video_3('./Media/control_vamosacomenzar.mp4')
-        elif protocol_type == 'robot':
-            play_audio('./Media/vamos_a_comenzar.mp3')
+            if ENG:
+                play_video_3('./Media/ENG_control_vamosacomenzar.mp4')
+            else:
+                play_video_3('./Media/control_vamosacomenzar.mp4')
+            time.sleep(3.8)
         elif protocol_type == 'video':
-            play_video_3('./Media/nao_vamosacomenzar.mp4')
+            if ENG:
+                play_video_3('./Media/ENG_nao_vamosacomenzar.mp4')
+            else:
+                play_video_3('./Media/nao_vamosacomenzar.mp4')
+            time.sleep(3.8)
+        elif protocol_type == 'robot':
+            if ENG:
+                move_command = "py -2 nao_controls.py --mode 1 --sound acomenzar --english True"  # launch your python2 script
+                process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
+            else:
+                move_command = "py -2 nao_controls.py --mode 1 --sound acomenzar"  # launch your python2 script
+                process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
+            time.sleep(6)
         else:
-            pass
-        time.sleep(6) #3.25 + 6 = 9 para adecuarse a los tempos del protocolo VR
+            time.sleep(6) #3.25 + 6 = 9 para adecuarse a los tempos del protocolo VR      
     else:
         pass
 
@@ -78,27 +103,39 @@ def relax_protocol(inlet, protocol_type, relax_time = 10, start = True):
     return df_relax
 
 
-def control_protocol(mov):
-    
-    if mov == 'right':
-        play_video_3('./Media/control_right.mp4')
-    elif mov == 'left':
-        play_video_3('./Media/control_left.mp4')
+def control_protocol(mov, ENG):
+
+    if ENG:
+        if mov == 'right':
+            play_video_3('./Media/ENG_control_right.mp4')
+        elif mov == 'left':
+            play_video_3('./Media/ENG_control_left.mp4')
+        else:
+            play_video_3('./Media/ENG_control_both.mp4')
     else:
-        play_video_3('./Media/control_both.mp4')
+        if mov == 'right':
+            play_video_3('./Media/control_right.mp4')
+        elif mov == 'left':
+            play_video_3('./Media/control_left.mp4')
+        else:
+            play_video_3('./Media/control_both.mp4')
+
 
     
-def robot_protocol(mov):
+def robot_protocol(mov, ENG):
 
     if mov == 'right':
-        asyncio.get_event_loop().run_until_complete(test_play_action('face_028b'))
+        move_command = "py -2 nao_controls.py --mode 2 --move right"  # launch your python2 script
+        process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
     elif mov == 'left':
-        asyncio.get_event_loop().run_until_complete(test_play_action('Surveillance_004'))
+        move_command = "py -2 nao_controls.py --mode 2 --move left"  # launch your python2 script
+        process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
     else:
-        asyncio.get_event_loop().run_until_complete(test_play_action('random_short5'))
+        move_command = "py -2 nao_controls.py --mode 2 --move both"  # launch your python2 script
+        process = subprocess.Popen(move_command.split(), stdout=subprocess.PIPE, text = True)
 
 
-def video_protocol(mov):
+def video_protocol(mov, ENG):
 
     if mov == 'right':
         play_video_3('./Media/nao_right_sound.mp4')
@@ -108,7 +145,7 @@ def video_protocol(mov):
         play_video_3('./Media/nao_both_sound.mp4')  
 
 
-def vr_protocol(mov):
+def vr_protocol(mov, ENG):
     pass
 
 def main():

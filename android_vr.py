@@ -33,7 +33,7 @@ def android_connect():
 
     if len(devices) == 0:
         messagebox.showerror(title="Conection error", message = "Dispositivo desconectado o innaccesible")
-        sys.exit(1)
+        #sys.exit(1)
         return False, []
     else:
         adb_wifi()
@@ -84,7 +84,7 @@ def stop_vr(device):
     kill_server()
 
 def main():
-    device_adb = android_connect()
+    flag, device_adb = android_connect()
     print(device_adb)
     #start_vr(device_adb)
 

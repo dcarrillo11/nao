@@ -89,7 +89,7 @@ def raw_mne(df_channels):
     raw = mne.io.RawArray(data, info)
 
     #Scale correction
-    raw.apply_function(lambda x: x*1e-6, picks="eeg")
+    raw.apply_function(lambda x: x*1e-7, picks="eeg")
 
     #CAR
     #raw.set_eeg_reference("average")
@@ -134,19 +134,19 @@ def filtering(raw, alpha = False, plots = False):
     raw_notch = raw_filt.copy().notch_filter(freqs = (50,100), picks = eeg_picks)
 
     #CAR
-    #raw_car = raw_notch.copy().set_eeg_reference("average")
+    raw_car = raw_notch.copy().set_eeg_reference("average")
 
     #Visualization
     if plots:
         raw.compute_psd().plot()
         #raw_filt.compute_psd().plot()
-        raw_notch.compute_psd().plot()
-        #raw_car.compute_psd().plot()
+        #raw_notch.compute_psd().plot()
+        raw_car.compute_psd().plot()
 
         raw.plot(start=15, duration=5)
         #raw_filt.plot(start=15, duration=5)
-        raw_notch.plot(start=15, duration=5, picks = ['eeg'])
-        #raw_car.plot(start=15, duration=5, picks = ['eeg'])
+        #raw_notch.plot(start=15, duration=5, picks = ['eeg'])
+        raw_car.plot(start=15, duration=5, picks = ['eeg'])
 
         plt.show()
 
@@ -329,8 +329,8 @@ def main():
         raw_data = raw_mne(only_eeg(file_path))
 
     filtered_data = filtering(raw_data, plots = True)
-    #events, events_dict = map_event(filtered_data, plots = plots)
-    #epochs, conditions = make_epochs(filtered_data, events, events_dict)
+    events, events_dict = map_event(filtered_data)
+    epochs, conditions = make_epochs(filtered_data, events, events_dict)
     #clean_artifacts(epochs, plots = plots)
     #evoked = avg_epochs(epochs, conditions)
 
