@@ -37,7 +37,7 @@ def main():
     #Protocol parameters#
     #####################
 
-    ENG = True #Modo ingles
+    ENG = False #Modo ingles
 
     left_electrodes = ['FC1', 'C3', 'C1', 'CP1']
     right_electrodes = ['FC2', 'C4', 'C2', 'CP2']
